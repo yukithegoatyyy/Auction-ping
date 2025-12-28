@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Auction Ping Generator</title>
+  <style>
+    body { background:#0f172a; color:#fff; font-family:sans-serif; padding:20px }
+    input, select, button, textarea {
+      width:100%; margin:6px 0; padding:10px;
+      background:#1e293b; color:#fff; border:1px solid #334155;
+    }
+    button { background:#2563eb; border:none; }
+    textarea { height:200px }
+  </style>
+</head>
+<body>
+
+<h2>Auction Ping Generator</h2>
+
+<select id="rarity">
+  <option>SSR</option>
+  <option>SR</option>
+  <option>R</option>
+  <option>C</option>
+</select>
+
+<input id="name" placeholder="Card Name">
+<input id="version" placeholder="Version (V27)">
+<select id="event">
+  <option value="">None</option>
+  <option value="xmas">Christmas 🎄</option>
+  <option value="halloween">Halloween 🎃</option>
+</select>
+<input id="link" placeholder="Discord Link">
+
+<button onclick="addCard()">Add Card</button>
+
+<h3>Output</h3>
+<textarea id="output" readonly></textarea>
+
+<button onclick="copy()">Copy</button>
+<button onclick="clearAll()">Clear</button>
+
+<script>
+const headers = {
+  SSR: "# <a:SuperSuperRare:1342208039918370857>",
+  SR: "# <a:SuperRare:1342208034482425936>",
+  R: "# <a:Rare:1342208028342091857>",
+  C: "# <a:Common:1342208021853634781>"
+};
+
+const tags = {
+  xmas: "<:mazoku_xmas:1453422761178562711>",
+  halloween: "<:mazoku_halloween:1433165322025959575>"
+};
+
+let cards = JSON.parse(localStorage.getItem("cards") || "[]");
+
+function addCard() {
+  cards.push({
+    rarity: rarity.value,
+    name: name.value,
+    version: version.value,
+    event: event.value,
+    link: link.value
+  });
+  save();
+}
+
+function save() {
+  localStorage.setItem("cards", JSON.stringify(cards));
+  render();
+}
+
+function render() {
+  let grouped = {SSR:[],SR:[],R:[],C:[]};
+  cards.forEach(c => {
+    let extra = c.event ? ` **(${tags[c.event]})**` : "";
+    grouped[c.rarity].push(
+      `[${c.rarity} ${c.name} ${c.version}](${c.link})${extra}`
+    );
+  });
+
+  let out = "`#339`\n";
+  for (let r in grouped) {
+    if (grouped[r].length) {
+      out += headers[r] + "\n" + grouped[r].join("\n") + "\n\n";
+    }
+  }
+  output.value = out.trim();
+}
+
+function copy() {
+  navigator.clipboard.writeText(output.value);
+}
+
+function clearAll() {
+  cards = [];
+  save();
+}
+
+render();
+</script>
+
+</body>
+</html>
